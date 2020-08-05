@@ -6,9 +6,9 @@ import time
 
 class ESConnection:
     def __init__(self):
-        self.elasticsearch = self.test_es_connection()
+        self.elasticsearch = self.connect_to_elasticsearch()
 
-    def test_es_connection(self):
+    def connect_to_elasticsearch(self):
         print("=================================================================")
         print("Testing Elasticsearch connection")
         try:
