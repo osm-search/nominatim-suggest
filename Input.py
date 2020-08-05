@@ -4,16 +4,13 @@ import json
 
 class DBConnection:
     def __init__(self):
-        self.db_connection = DBConnection()
+        self.connection = self.connect_to_db()
 
 
-    def connect_and_test_db(self):
-        connection = self.db_connection.connect_to_db()
-        self.db_connection.get_dsn_parameters(connection)
-        self.db_connection.fetch_test(connection)
-        # self.db_connection.fetch_and_create_doc(connection)
-        return connection
-
+    def test_connection(self):
+        self.connection.get_dsn_parameters()
+        self.connection.fetch_test()
+        # self.connection.fetch_and_create_doc()
 
 
     def connect_to_db(self):
@@ -34,22 +31,22 @@ class DBConnection:
             print("Failed")
             exit
 
-    def get_dsn_parameters(self, connection):
+    def get_dsn_parameters(self):
         print("=================================================================")
         print("Trying to print DSN parameters: ")
         try:
-            print(connection.get_dsn_parameters())
+            print(self.connection.connection.get_dsn_parameters())
         except:
             print("Failed")
             exit
 
-    def fetch_test(self, connection):
+    def fetch_test(self):
         print("=================================================================")
         print("Trying to fetch from placex table: ")
 
         try:
             sql = "SELECT * from placex limit 1;"
-            cursor = connection.cursor(cursor_factory=DictCursor)
+            cursor = self.connection.cursor(cursor_factory=DictCursor)
             cursor.execute(sql)
             record = cursor.fetchone()
             print(sql, "\n")
@@ -63,6 +60,6 @@ class DBConnection:
 
 if __name__ == "__main__":
     conn = DBConnection()
-    conn.connect_and_test_db()
+    conn.test_connection()
 
 # test_doc()
