@@ -15,7 +15,10 @@ if __name__ == "__main__":
     index_name = "nominatim_test"
     elasticsearch = ESConnection()
     elasticsearch.delete_index(index_name)
-    elasticsearch.create_index(index_name)
+    with open('mapping.json') as f:
+        mapping = json.load(f)
+    # print(mapping)
+    elasticsearch.create_index(index_name, mapping)
 
     print("================================================================")
     print("================================================================")

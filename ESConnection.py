@@ -22,7 +22,7 @@ class ESConnection:
         return elasticsearch
 
     # Creates a new elasticsearch index with the provided index_name
-    def create_index(self, index_name):
+    def create_index(self, index_name, mapping):
         print("=================================================================")
         print("Trying to create an index")
         try:
@@ -31,7 +31,7 @@ class ESConnection:
                 print("Index", index_name, "exists")
             else:
                 print("Index does not exist. Creating index", index_name)
-                self.elasticsearch.indices.create(index_name)
+                self.elasticsearch.indices.create(index_name, mapping)
         except:
             print("Failed")
 
@@ -82,9 +82,12 @@ class ESConnection:
 
 
 if __name__ == "__main__":
+    with open('mapping.json') as f:
+        mapping = json.load(f)
+    print(mapping)
     index_name = "nominatim_test"
     es_connection = ESConnection()
-    es_connection.create_index(index_name)
+    es_connection.create_index(index_name, mapping)
     doc = {"age": 21, "first name": "Rahul", "last name": "Reddy"}
     es_connection.insert_doc(index_name, doc)
     print("Waiting for 3 seconds for changes to reflect")
