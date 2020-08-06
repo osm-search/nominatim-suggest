@@ -8,6 +8,7 @@ class ESConnection:
     def __init__(self):
         self.elasticsearch = self.connect_to_elasticsearch()
 
+    # Tests if the elasticsearch connection is possible by pinging the server
     def connect_to_elasticsearch(self):
         print("=================================================================")
         print("Testing Elasticsearch connection")
@@ -20,7 +21,7 @@ class ESConnection:
             exit
         return elasticsearch
 
-
+    # Creates a new elasticsearch index with the provided index_name
     def create_index(self, index_name):
         print("=================================================================")
         print("Trying to create an index")
@@ -34,7 +35,7 @@ class ESConnection:
         except:
             print("Failed")
 
-
+    # Inserts a single doc into an index
     def insert_doc(self, index_name, doc):
         print("=================================================================")
         print("Trying to insert doc into", index_name)
@@ -45,14 +46,16 @@ class ESConnection:
         except:
             print("Failed")
 
-    def search_results(self, index_name):
+    # Performs a simple search on an index
+    def search_results(self, index_name, q):
         print("=================================================================")
         print("Trying to search for `Rahul` from", index_name)
         try:
-            print(self.elasticsearch.search(index_name, q="Rahul"))
+            print(self.elasticsearch.search(index_name, q))
         except:
             print("Failed")
 
+    # Deletes and index if it exists
     def delete_index(self, index_name):
         print("=================================================================")
         print("Trying to delete an index")
@@ -76,5 +79,5 @@ if __name__ == "__main__":
     es_connection.insert_doc(index_name, doc)
     print("Waiting for 3 seconds for changes to reflect")
     time.sleep(3)
-    es_connection.search_results(index_name)
+    es_connection.search_results(index_name, 'asdf')
     es_connection.delete_index(index_name)
