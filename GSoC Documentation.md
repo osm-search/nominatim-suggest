@@ -7,6 +7,7 @@ The suggestions can be accessed in the form of json string at http://95.217.117.
 
 The sample output for http://95.217.117.45:8000/pref?q=vensa%20royal is:
 
+{"total": {"value": 1, "relation": "eq"}, "max_score": 672.3452, "hits": [{"_index": "nominatim_final", "_type": "_doc", "_id": "_jb-q3MBKZ4LD9sy0oi7", "_score": 672.3452, "_source": {"addr": "Vensa Royal Apartment, Gurumurthy Swamy Temple Road", "place_id": 242690023, "postcode": "583105", "country_code": "in"}}]}
 
 ### Installation and setup
 Reqirements to provide the suggestions:
@@ -61,4 +62,4 @@ Addresses will being formed only in zh, sp, en, ar, fr, ru, pt, de, ja and ko la
 
 The HUG rest API does a prefix match on all the fields.
 
-The javascript code (available [here]()) fetches the results from the HUG rest API. Once the results are fetched, we display the most relevent language options as an option list. 
+The javascript code (available [here](https://github.com/krahulreddy/nominatim-ui/blob/suggestions/dist/assets/js/suggest.js)) fetches the results from the HUG rest API. Once the results are fetched, we display the most relevent language options as an option list. 
