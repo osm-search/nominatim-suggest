@@ -46,6 +46,16 @@ class ESConnection:
         except:
             print("Failed")
 
+    # Bulk index the documents
+    def bulk_index(self, index_name, body):
+        print("=================================================================")
+        print("Trying to insert docs into", index_name)
+        try:
+            self.elasticsearch.bulk(index_name, body=body)
+            print("Indexed successfully")
+        except:
+            print("Failed")
+
     # Performs a simple search on an index
     def search_results(self, index_name, q):
         print("=================================================================")
