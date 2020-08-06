@@ -17,11 +17,6 @@ Reqirements to provide the suggestions:
 
         pip3 install elasticsearch
 
-    To start the elasticsearch server, run
-
-        cd path/to/elasticsearch-7.6.2/bin
-        ./elasticsearch
-
 * HUG rest API
     The search suggestions API for elasticsearch is provided by es.py. It uses hug.rest.
 
@@ -31,22 +26,39 @@ Reqirements to provide the suggestions:
 
         hug -f filename
 
-    For our project, we have search.py. This file is currently available [here](https://github.com/krahulreddy/Nominatim/blob/gsoc/search.py). You can host this file from anywhere.
-
-        hug -f search.py -p 8000
-
-
 ### Running and Debugging
-The logs from the 
+
+To start the elasticsearch server, run
+
+    cd path/to/elasticsearch-7.6.2/bin
+    ./elasticsearch
+
+For our project, we have search.py. This file is currently available [here](https://github.com/krahulreddy/Nominatim/blob/gsoc/search.py). You can host this file from anywhere.
+
+    hug -f search.py -p 8000
+
+
+The logs from search.py and the elasticsearch logs should be enough for debugging any issues with suggestions. 
 
 ## Code
 
+The code is available at [https://github.com/krahulreddy/nominatim-indexing](https://github.com/krahulreddy/nominatim-indexing). All the Classes and methods have comments to give an understanding of how they work. 
 
 ## Suggestions setup
 ### Address formation
-Addresses are being formed only in zh, sp, en, ar, fr, ru, pt, de, ja and ko languages.
+Addresses formation has the following algorithm:
+For each record in placex sorted by rank_address:
+* If rank < 30:
+    Use the place_addressline table to recursively form the address of the place.
+    The addresses are formed in languages mentioned in the next section. If any of the parent places does not have a name in the required language, we add default name over there.
+* Else:
+    Address is formed as place name, parent_place name
 
 ### Language support
+Addresses will being formed only in zh, sp, en, ar, fr, ru, pt, de, ja and ko languages.
 
 ### Elasticsearch support and queries
 
+The HUG rest API does a prefix match on all the fields.
+
+The javascript code (available [here]()) fetches the results from the HUG rest API. Once the results are fetched, we display the most relevent language options as an option list. 
