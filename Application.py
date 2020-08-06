@@ -12,7 +12,7 @@ tags = ['name', 'name:en', 'name:it', 'name:fr', 'name:de']
 if __name__ == "__main__":
     db_connection = DBConnection()
 
-    index_name = "nominatim_final"
+    index_name = "nominatim_test"
     elasticsearch = ESConnection()
     elasticsearch.delete_index(index_name)
     elasticsearch.create_index(index_name)
