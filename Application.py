@@ -10,7 +10,7 @@ import json
 if __name__ == "__main__":
     languages = ['zh', 'sp', 'en', 'ar', 'fr', 'ru', 'pt', 'de', 'ja', 'ko']
     tags = ['name:'+i for i in languages]
-    tags.append['name']
+    tags.append('name')
 
     db_connection = DBConnection()
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     elasticsearch.delete_index(index_name)
     with open('mapping.json') as f:
         mapping = json.load(f)
-    # print(mapping)
+    # print(mapping[index_name])
     elasticsearch.create_index(index_name, mapping)
 
     print("================================================================")
@@ -40,7 +40,7 @@ order by rank_address"
     start_time = time.time()
     bucket_start = time.time()
     j = 0
-    for record in cursor:
+    for record in tqdm(cursor):
         if t == 0:
             t = bucket
             j = j + 1
@@ -50,7 +50,7 @@ order by rank_address"
             records = []
             docs = []
             a = ''
-        doc = form_doc(db_connection, record, tags)
+        doc = form_doc(db_connection.connection, record, tags)
 
         docs.append(doc)
         header = { "index" : { "_index" : index_name } }
