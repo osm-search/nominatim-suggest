@@ -1,5 +1,4 @@
 {
-    "nominatim_final": {
         "aliases": {},
         "mappings": {
             "properties": {
@@ -112,7 +111,8 @@
                     }
                 },
                 "place_id": {
-                    "indexed": false,
+                    "store": true,
+                    "index": false,
                     "type": "long"
                 },
                 "postcode": {
@@ -131,5 +131,4 @@
                 "number_of_replicas": "0"
             }
         }
-    }
 }
