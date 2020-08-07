@@ -7,9 +7,11 @@ import pprint
 from Helper import form_doc
 import json
 
-
-tags = ['name', 'name:en', 'name:it', 'name:fr', 'name:de']
 if __name__ == "__main__":
+    languages = ['zh', 'sp', 'en', 'ar', 'fr', 'ru', 'pt', 'de', 'ja', 'ko']
+    tags = ['name:'+i for i in languages]
+    tags.append['name']
+
     db_connection = DBConnection()
 
     index_name = "nominatim_test"
