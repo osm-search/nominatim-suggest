@@ -1,5 +1,6 @@
 from psycopg2.extras import RealDictCursor, DictCursor, register_hstore
 
+# It forms a doc that can be indexed in elasticsearch.
 def form_doc(db_connection, record, tags):
     formed_address = form_address(db_connection, record, tags)
     doc = formed_address
@@ -14,6 +15,8 @@ def form_doc(db_connection, record, tags):
         doc.update({'country_code': record['country_code']})
     return doc
 
+# Recursively forms address of parent places in the required language
+# returns a string containing the address
 def form_parent_address(connection, record, tag):
     if record["rank_search"] < 5:
         if record['name'] and record['name']['name']:
@@ -40,6 +43,8 @@ def form_parent_address(connection, record, tag):
         return record['name'][tag]
     return ""
 
+# Forms the address of a place in all languages mentioned in the `tag` list
+# returns a dictionary with the available tags and the address strings
 def form_address(connection, record, tags):
     if not record['name']:
         return {"addr": ""}
@@ -85,7 +90,7 @@ def form_address(connection, record, tags):
     return add
 
 
-
+# Fetches a single record with given place_id
 def fetch_record(connection, place_id):
     if not place_id:
         return None
