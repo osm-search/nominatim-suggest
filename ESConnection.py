@@ -51,7 +51,7 @@ class ESConnection:
         print("=================================================================")
         print("Trying to insert docs into", index_name)
         try:
-            self.elasticsearch.bulk(index_name, body=body)
+            self.elasticsearch.bulk(body=body, index=index_name)
             print("Indexed successfully")
         except:
             print("Failed")
