@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     print("================================================================")
     print("================================================================")
-    sql = "SELECT place_id, parent_place_id, name, address, country_code,\
+    sql = "SELECT place_id, parent_place_id, name, address, country_code, importance, \
          housenumber, postcode, rank_search, rank_address from placex where name is not null \
 and name ?| ARRAY[" + ','.join(["'" + tag + "'" for tag in tags]) + "] \
 order by rank_search"
