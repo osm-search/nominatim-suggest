@@ -11,10 +11,11 @@ if __name__ == "__main__":
     languages = ['zh', 'sp', 'en', 'ar', 'fr', 'ru', 'pt', 'de', 'ja', 'ko']
     tags = ['name:'+i for i in languages]
     tags.append('name')
+    tags.append('old_name')
 
     db_connection = DBConnection()
 
-    index_name = "nominatim_test"
+    index_name = "nominatim_test_"
     elasticsearch = ESConnection()
     elasticsearch.delete_index(index_name)
     with open('mapping.json') as f:
@@ -26,7 +27,8 @@ if __name__ == "__main__":
     print("================================================================")
     sql = "SELECT place_id, parent_place_id, name, address, country_code,\
          housenumber, postcode, rank_search, rank_address from placex where name is not null \
-order by rank_address"
+and name ?| ARRAY[" + ','.join(["'" + tag + "'" for tag in tags]) + "] \
+order by rank_search"
     print(sql, "\n")
 
     cursor = db_connection.connection.cursor(cursor_factory=RealDictCursor, name='mycursor')

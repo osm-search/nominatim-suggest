@@ -102,6 +102,8 @@
                     }
                 },
                 "country_code": {
+                    "store": true,
+                    "index": false,
                     "type": "text",
                     "fields": {
                         "keyword": {
@@ -111,8 +113,6 @@
                     }
                 },
                 "place_id": {
-                    "store": true,
-                    "index": false,
                     "type": "long"
                 },
                 "postcode": {

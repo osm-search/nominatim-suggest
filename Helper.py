@@ -9,11 +9,40 @@ def form_doc(db_connection, record, tags):
         doc.update({'osm_id': record['osm_id'], 'osm_type': record['osm_type']})
     if record['postcode']:
         doc.update({'postcode': record['postcode']})
-    if record['address']:
-        doc.update({'nominatim_address': record['address']})
+    if 'importance' in record:
+        doc.update({'importance': record['importance']})
     if record['country_code']:
         doc.update({'country_code': record['country_code']})
+    # print(doc)
     return doc
+
+def form_address(connection, record, tags):
+
+    sql = "SELECT * from place_addressline where isaddress=true and place_id = " + str(record['place_id']) + " order by cached_rank_address desc"
+
+    cursor = connection.cursor(cursor_factory=RealDictCursor)
+    cursor.execute(sql)
+    
+    address = {}
+    for name_tag in record['name']:
+        if name_tag in tags:
+            address[name_tag.replace("name", "addr")] = record['name'][name_tag]
+    for a_record in cursor:
+        parent_record = fetch_record(connection, a_record['address_place_id'])
+        if not parent_record['name']:
+            continue
+        for tag in tags:
+            if tag in record['name']:
+                if tag in parent_record['name']:
+                    # print(parent_record['name']['tag'], end=', ')
+                    address[tag.replace("name", "addr")] += ", " + parent_record['name'][tag]   
+                elif 'name' in parent_record['name']:
+                    address[tag.replace("name", "addr")] += ", " + parent_record['name']['name']
+    if not address:
+        print(record['place_id'], record['name'])
+    return address
+
+
 
 # Recursively forms address of parent places in the required language
 # returns a string containing the address
@@ -45,7 +74,7 @@ def form_parent_address(connection, record, tag):
 
 # Forms the address of a place in all languages mentioned in the `tag` list
 # returns a dictionary with the available tags and the address strings
-def form_address(connection, record, tags):
+def form_address1(connection, record, tags):
     if not record['name']:
         return {"addr": ""}
     if record["rank_search"] < 5:
