@@ -11,7 +11,6 @@ if __name__ == "__main__":
     languages = ['zh', 'sp', 'en', 'ar', 'fr', 'ru', 'pt', 'de', 'ja', 'ko']
     tags = ['name:'+i for i in languages]
     tags.append('name')
-    tags.append('old_name')
 
     db_connection = DBConnection()
 
@@ -28,7 +27,7 @@ if __name__ == "__main__":
     sql = "SELECT place_id, parent_place_id, name, address, country_code, importance, \
          housenumber, postcode, rank_search, rank_address from placex where name is not null \
 and name ?| ARRAY[" + ','.join(["'" + tag + "'" for tag in tags]) + "] \
-order by rank_search"
+order by rank_address"
     print(sql, "\n")
 
     cursor = db_connection.connection.cursor(cursor_factory=RealDictCursor, name='mycursor')
