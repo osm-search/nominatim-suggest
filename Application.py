@@ -27,7 +27,7 @@ if __name__ == "__main__":
     sql = "SELECT place_id, parent_place_id, name, address, country_code, importance, \
          housenumber, postcode, rank_search, rank_address from placex where name is not null \
 and name ?| ARRAY[" + ','.join(["'" + tag + "'" for tag in tags]) + "] \
-order by rank_address"
+order by rank_search"
     print(sql, "\n")
 
     cursor = db_connection.connection.cursor(cursor_factory=RealDictCursor, name='mycursor')
@@ -51,7 +51,7 @@ order by rank_address"
             records = []
             docs = []
             a = ''
-        doc = form_doc(db_connection.connection, record, tags)
+        doc = form_doc(db_connection.connection, record, tags, index_name)
 
         docs.append(doc)
         header = { "index" : { "_index" : index_name } }

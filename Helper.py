@@ -1,8 +1,9 @@
 from psycopg2.extras import RealDictCursor, DictCursor, register_hstore
+from ESConnection import ESConnection
 
 # It forms a doc that can be indexed in elasticsearch.
-def form_doc(db_connection, record, tags):
-    formed_address = form_address(db_connection, record, tags)
+def form_doc(db_connection, record, tags, index_name='nonminatim'):
+    formed_address = form_address(db_connection, record, tags, index_name)
     doc = formed_address
     doc.update({'place_id': record['place_id']})
     if 'osm_id' in record:
@@ -10,16 +11,18 @@ def form_doc(db_connection, record, tags):
     if record['postcode']:
         doc.update({'postcode': record['postcode']})
     if record['importance']:
-        doc.update({'importance': record['importance']})
+        doc.update({'importance': float(record['importance'])})
+    else:
+        doc.update({'importance': 0.75 - float(record['rank_search']) / 40})
     if record['country_code']:
         doc.update({'country_code': record['country_code']})
     # print(doc)
     return doc
 
-def form_address(connection, record, tags):
+def form_address(connection, record, tags, index_name='nominatim'):
     if not record or not record['name']:
         return {}
-    if record['rank_address'] > 29:
+    if record['rank_search'] > 29:
         parent_address = form_address(connection, fetch_record(connection, record['parent_place_id']), tags)
         address = {}
         for name_tag in record['name']:
@@ -31,7 +34,13 @@ def form_address(connection, record, tags):
         # print(address)
         return address
 
-    sql = "SELECT * from place_addressline where isaddress=true and place_id = " + str(record['place_id']) + " order by cached_rank_address desc"
+    sql = "SELECT p.name from place_addressline a, placex p\
+ where a.isaddress=true and a.place_id = " + str(record['place_id']) + " \
+   and a.address_place_id = p.place_id \
+	 order by cached_rank_address desc"
+    
+    # print(record['rank_search'], record['rank_address'])
+    # print(sql)
 
     cursor = connection.cursor(cursor_factory=RealDictCursor)
     cursor.execute(sql)
@@ -40,10 +49,13 @@ def form_address(connection, record, tags):
     for name_tag in record['name']:
         if name_tag in tags:
             address[name_tag.replace("name", "addr")] = record['name'][name_tag]
-    for a_record in cursor:
-        parent_record = fetch_record(connection, a_record['address_place_id'])
+
+    # print(address)
+    for parent_record in cursor:
+        # print(parent_record)
         if not parent_record['name']:
             continue
+        # print('bleh')
         for tag in tags:
             if tag in record['name']:
                 if tag in parent_record['name']:
@@ -51,6 +63,7 @@ def form_address(connection, record, tags):
                     address[tag.replace("name", "addr")] += ", " + parent_record['name'][tag]   
                 elif 'name' in parent_record['name']:
                     address[tag.replace("name", "addr")] += ", " + parent_record['name']['name']
+    # print(address)
     return address
 
 # Fetches a single record with given place_id
@@ -69,76 +82,7 @@ def fetch_record(connection, place_id):
     return record
 
 
-# # Recursively forms address of parent places in the required language
-# # returns a string containing the address
-# def form_parent_address(connection, record, tag):
-#     if record["rank_search"] < 5:
-#         if record['name'] and record['name']['name']:
-            
-#             return record['name']['name']
-#         return record['name']
-    
-#     sql = "SELECT * from place_addressline where isaddress=true and place_id = " + str(record['place_id'])
 
-#     cursor = connection.cursor(cursor_factory=RealDictCursor)
-#     cursor.execute(sql)
-
-#     a_record = cursor.fetchone()
-    
-#     if a_record:
-#         if tag in record['name']:
-#             return record['name'][tag] + ", " + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
-#         else:
-#             if 'name' in record['name']:
-#                 return record['name']['name'] + ", " + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
-#             else:
-#                 return form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
-#     if tag in record['name'] and record['name'][tag]:
-#         return record['name'][tag]
-#     return ""
-
-# # Forms the address of a place in all languages mentioned in the `tag` list
-# # returns a dictionary with the available tags and the address strings
-# def form_address1(connection, record, tags):
-#     if not record['name']:
-#         return {"addr": ""}
-#     if record["rank_search"] < 5:
-#         if record['name'] and "name" in record['name']:
-            
-#             return {"addr": record['name']['name']}
-#         return {"addr": record['name']}
-#     if record["rank_search"] > 29:
-#         add = {}
-#         parent_record = fetch_record(connection, record['parent_place_id'])
-#         for tag in record['name'].keys():
-#             if "name" not in tag or tag not in tags:
-#                 continue
-#             parent = ""
-#             if parent_record and 'name' in parent_record and parent_record['name']:
-#                 if tag in parent_record['name']:
-#                     parent = ", " + parent_record['name'][tag]
-#                 add[tag.replace("name", "addr")] = record['name'][tag] + parent
-#         return add
-    
-#     sql = "SELECT * from place_addressline where isaddress=true and place_id = " + str(record['place_id'])
-
-
-#     cursor = connection.cursor(cursor_factory=RealDictCursor)
-#     cursor.execute(sql)
-
-#     a_record = cursor.fetchone()
-#     add = {}
-#     parent_record = fetch_record(connection, record['parent_place_id'])
-#     for tag in record['name'].keys():
-#         if "name" not in tag or tag not in tags:
-#             continue
-#         parent = ""
-#         if parent_record and 'name' in parent_record and parent_record['name']:
-#             if tag in parent_record['name']:
-#                 parent = ", " + parent_record['name'][tag]
-#         parent = ''
-#         if a_record:
-#             add[tag.replace("name", "addr")] = record['name'][tag] + parent + ", " + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
-#         else:
-#             add[tag.replace("name", "addr")] = record['name'][tag] + parent
-#     return add
+        # es = ESConnection()
+        # parent_address = es.search_with_place_id(index_name, record['parent_place_id'])
+        # if not parent_address:

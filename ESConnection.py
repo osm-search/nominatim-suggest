@@ -59,9 +59,26 @@ class ESConnection:
     # Performs a simple search on an index
     def search_results(self, index_name, q):
         print("=================================================================")
-        print("Trying to search for `Rahul` from", index_name)
+        print("Trying to search from", index_name)
         try:
             print(self.elasticsearch.search(index_name, q))
+        except:
+            print("Failed")
+
+    def search_with_place_id(self, index_name, place_id):
+        print("=================================================================")
+        # print("Trying to search from", index_name)
+        try:
+            res = es.search("nominatim_test_", body={
+                "query": {
+                    "match": {
+                        "place_id": {
+                            "query": place_id
+                        }
+                    }
+                }
+            })['hits']['hits'][0]
+            return res
         except:
             print("Failed")
 
