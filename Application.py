@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     db_connection = DBConnection()
 
-    index_name = "nominatim_test_"
+    index_name = "nominatim_sugg"
     elasticsearch = ESConnection()
     elasticsearch.delete_index(index_name)
     with open('mapping.json') as f:
