@@ -3,11 +3,26 @@
 The suggestions are provided by a hug API, which is usually hosted on port 8000 of the server. These suggestions are provided by using a prefix search on the elasticsearch index.
 
 ### Usage
-The suggestions can be accessed in the form of json string at http://95.217.117.45:8000/pref?q=. The query parameter `q` accepts UTF-8 characters. The server then queries it against the elasticsearch index. The API currently returns the address in zh, sp, en, ar, fr, ru, pt, de, ja and ko languages. The formation of addresses in these languages is discussed in a later section.
+The suggestions can be accessed in the form of json string at https://gsoc2020.nominatim.org/suggest/autocomplete?q=. The API currently returns the address in zh, sp, en, ar, fr, ru, pt, de, ja and ko languages. The formation of addresses in these languages is discussed in a later section.
 
-The sample output for http://95.217.117.45:8000/pref?q=vensa%20royal is:
+The sample output for https://gsoc2020.nominatim.org/suggest/autocomplete?q=vensa%20royal is:
 
-{"total": {"value": 1, "relation": "eq"}, "max_score": 672.3452, "hits": [{"_index": "nominatim_final", "_type": "_doc", "_id": "_jb-q3MBKZ4LD9sy0oi7", "_score": 672.3452, "_source": {"addr": "Vensa Royal Apartment, Gurumurthy Swamy Temple Road", "place_id": 242690023, "postcode": "583105", "country_code": "in"}}]}
+{
+  "0": {
+    "addr": "Vensa Royal Apartment, Gurumurthy Swamy Temple Road, Mangammanapalya, Bommanahalli Zone, Bengaluru, Bangalore South, Bangalore Urban, Karnataka",
+    "place_id": 242690023,
+    "postcode": "583105",
+    "importance": 0.0,
+    "country_code": "in",
+    "calculated_score": 1.0
+  }
+}
+
+#### API Parameters
+
+- `q`: accepts UTF-8 characters. The query string to search against the elasticsearch index.
+- `limit`: The number of results to be returned by the API.
+- `factor`: A paramaeter to modify the search sorting based on the formula factor => Naminatim importance * factor + elasticsearch_score. This can be modified to get appropriate results. This is not required after finalizing the appropriate factor value.
 
 ### Installation and setup
 Reqirements to provide the suggestions:
