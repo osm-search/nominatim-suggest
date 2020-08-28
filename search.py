@@ -10,10 +10,42 @@ def CORS(request, response, resource):
     response.set_header('Access-Control-Allow-Methods', 'GET')
 
 @hug.get('/autocomplete')
-def pref(q, limit=10, factor=50):
+def pref(q, fuzzy=False, limit=10, factor=50):
     if q == '':
         return
     es = Elasticsearch()
+    print(fuzzy)
+    if fuzzy == 'True':
+        print("Fuzzy query")
+        res = es.search(index="nominatim_sugg", body={
+            "query": {
+                "fuzzy": {
+                    "addr": {
+                        "value": q
+                    }
+                }
+            },
+            "sort": {
+                "_script": {
+                    "type": "number",
+                    "script": {
+                        "source": "doc[\"importance\"].value * params.factor + _score",
+                        "params": {
+                            "factor": 50
+                        }
+                    },
+                "order": "desc"
+                }
+            }
+        })
+        hits = res['hits']['hits']
+        results = {}
+        for i, hit in enumerate(hits):
+            hit['_source'].update({"calculated_score": hit['sort'][0]})
+            results[i] = hit['_source']
+
+        return results
+
     terms = []
     if type(q) is not list:
         q = [q]
@@ -26,9 +58,8 @@ def pref(q, limit=10, factor=50):
             "query": {
                 "multi_match": {
                     "query": terms[-1],
-                    "type": "phrase_prefix",
-                    "analyzer": "my_custom_analyzer"
-                } 
+                    "type": "phrase_prefix"
+                }
             },
             "sort": {
                 "_script": {
@@ -67,7 +98,7 @@ def pref(q, limit=10, factor=50):
                             }
                         }
                     ]
-                } 
+                }
             },
             "sort": {
                 "_script": {

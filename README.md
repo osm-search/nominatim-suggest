@@ -3,9 +3,9 @@
 The suggestions are provided by a hug API, which is usually hosted on port 8000 of the server. These suggestions are provided by using a prefix search on the elasticsearch index.
 
 ### Usage
-The suggestions can be accessed in the form of json string at https://gsoc2020.nominatim.org/suggest/autocomplete?q=. The API currently returns the address in zh, sp, en, ar, fr, ru, pt, de, ja and ko languages. The formation of addresses in these languages is discussed in a later section.
+The suggestions can be accessed in the form of json string at https://localhost:8000/autocomplete?q=. The API currently returns the address in zh, sp, en, ar, fr, ru, pt, de, ja and ko languages. The formation of addresses in these languages is discussed in a later section.
 
-The sample output for https://gsoc2020.nominatim.org/suggest/autocomplete?q=vensa%20royal is:
+The sample output for https://localhost:8000/suggest/autocomplete?q=vensa%20royal is:
 
 {
   "0": {
@@ -23,6 +23,7 @@ The sample output for https://gsoc2020.nominatim.org/suggest/autocomplete?q=vens
 - `q`: accepts UTF-8 characters. The query string to search against the elasticsearch index.
 - `limit`: The number of results to be returned by the API.
 - `factor`: A paramaeter to modify the search sorting based on the formula factor => Naminatim importance * factor + elasticsearch_score. This can be modified to get appropriate results. This is not required after finalizing the appropriate factor value.
+- `fuzzy`: Provides results with typo tolerence.
 
 ### Installation and setup
 Reqirements to provide the suggestions:
