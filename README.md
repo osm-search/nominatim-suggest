@@ -34,8 +34,13 @@ Addresses will being formed only in zh, sp, en, ar, fr, ru, pt, de, ja and ko la
 
 The HUG rest API does a prefix match on all the fields.
 
-The javascript code (available [here](https://github.com/krahulreddy/nominatim-ui/blob/suggestions/dist/assets/js/suggest.js)) fetches the results from the HUG rest API. Once the results are fetched, we display the most relevent language options as a list. The language list needs to be updated in the js code as well to get appropriate suggestions. 
+The javascript code (available [here](https://github.com/krahulreddy/nominatim-ui/blob/suggestions/dist/assets/js/suggest.js)) fetches the results from the HUG rest API. Once the results are fetched, we display the most relevent language options as a list. The language list needs to be updated in the js code as well to get appropriate suggestions.
 
+The javascript code makes sure the results are formatted
+
+#### For reusing the suggestions setup
+
+Make sure [suggestions.js](https://github.com/krahulreddy/nominatim-ui/blob/suggestions/dist/assets/js/suggest.js) and [suggestions.css](https://github.com/krahulreddy/nominatim-ui/blob/suggestions/dist/assets/css/suggest.css) are included in your setup. The search division must be similar to the search bar [here](https://github.com/krahulreddy/nominatim-ui/blob/suggestions/dist/search.html#L149). That exact division can be used along with the two files to start getting suggestions.
 
 ## API and Server
 The suggestions are provided by a hug API, which is usually hosted on port 8000 of the server. These suggestions are provided by using a prefix search on the elasticsearch index.
@@ -105,6 +110,7 @@ The sample output format is:
 For all the queries, we sort the results based on the importance score calculated by [wiki importance or {0.75 - record['rank_search'] / 40}] * factor + elasticsearch score.
 
 Query body for Fuzzy query (For typo tolerence):
+
     {
         "query": {
             "fuzzy": {
