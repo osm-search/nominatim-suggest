@@ -34,7 +34,7 @@ Addresses will being formed only in zh, sp, en, ar, fr, ru, pt, de, ja and ko la
 
 The HUG rest API does a prefix match on all the fields.
 
-The javascript code (available [here](https://github.com/krahulreddy/nominatim-ui/blob/suggestions/dist/assets/js/suggest.js)) fetches the results from the HUG rest API. Once the results are fetched, we display the most relevent language options as an option list. 
+The javascript code (available [here](https://github.com/krahulreddy/nominatim-ui/blob/suggestions/dist/assets/js/suggest.js)) fetches the results from the HUG rest API. Once the results are fetched, we display the most relevent language options as a list. The language list needs to be updated in the js code as well to get appropriate suggestions. 
 
 
 ## API and Server
@@ -76,18 +76,22 @@ The logs from search.py and the elasticsearch logs should be enough for debuggin
 ### Usage
 The suggestions can be accessed in the form of json string at https://localhost:8000/autocomplete?q=. The API currently returns the address in zh, sp, en, ar, fr, ru, pt, de, ja and ko languages. The formation of addresses in these languages is discussed in a later section.
 
-The sample output for https://localhost:8000/suggest/autocomplete?q=vensa%20royal is:
-
-{
-  "0": {
-    "addr": "Vensa Royal Apartment, Gurumurthy Swamy Temple Road, Mangammanapalya, Bommanahalli Zone, Bengaluru, Bangalore South, Bangalore Urban, Karnataka",
-    "place_id": 242690023,
-    "postcode": "583105",
-    "importance": 0.0,
-    "country_code": "in",
-    "calculated_score": 1.0
-  }
-}
+The sample output format is:
+        {
+            "0": {
+                    "addr": "",
+                    ...
+                    "place_id": ,
+                    "postcode": ,
+                    "importance": ,
+                    "country_code": ,
+                    "calculated_score": 
+            },
+            "1": {
+                ...
+            },
+            ...
+        } 
 
 #### API Parameters
 
@@ -95,6 +99,100 @@ The sample output for https://localhost:8000/suggest/autocomplete?q=vensa%20roya
 - `limit`: The number of results to be returned by the API.
 - `factor`: A paramaeter to modify the search sorting based on the formula factor => Naminatim importance * factor + elasticsearch_score. This can be modified to get appropriate results. This is not required after finalizing the appropriate factor value.
 - `fuzzy`: Provides results with typo tolerence.
+
+### Elasticsearch queries
+
+For all the queries, we sort the results based on the importance score calculated by [wiki importance or {0.75 - record['rank_search'] / 40}] * factor + elasticsearch score.
+
+Query body for Fuzzy query (For typo tolerence):
+    {
+        "query": {
+            "fuzzy": {
+                "addr": {
+                    "value": q
+                }
+            }
+        },
+        "sort": {
+            "_script": {
+                "type": "number",
+                "script": {
+                    "source": "doc[\"importance\"].value * params.factor + _score",
+                    "params": {
+                        "factor": 50
+                    }
+                },
+            "order": "desc"
+            }
+        },
+        "size": limit
+    }
+
+Query for single word queries (Direct prefix match)
+
+    {
+        "query": {
+            "multi_match": {
+                "query": terms[-1],
+                "type": "phrase_prefix"
+            }
+        },
+        "sort": {
+            "_script": {
+                "type": "number",
+                "script": {
+                    "lang": "painless",
+                    "source": "doc[\"importance\"].value * " + str(factor) + " + _score",
+                    "params": {
+                        "factor": factor
+                    }
+                },
+            "order": "desc"
+            }
+        },
+        "size": limit
+    }
+
+If the query string has more than one word, we use tokenization. First n-1 words are used to get terms_set matching. The last word is used to get prefix matching.
+
+    {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "multi_match": {
+                            "query": terms[-1],
+                            "type": "phrase_prefix"
+                        }
+                    },
+                    {
+                        "terms_set": {
+                            "addr": {
+                                "terms": terms[:-1],
+                                "minimum_should_match_script": {
+                                    "source": "params.num_terms"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "sort": {
+            "_script": {
+                "type": "number",
+                "script": {
+                    "lang": "painless",
+                    "source": "doc[\"importance\"].value * " + str(factor) + " + _score",
+                    "params": {
+                        "factor": factor
+                    }
+                },
+            "order": "desc"
+            }
+        },
+        "size": limit
+    }
 
 ## Code
 

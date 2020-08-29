@@ -11,10 +11,38 @@ def CORS(request, response, resource):
 
 @hug.get('/autocomplete')
 def pref(q, fuzzy=False, limit=10, factor=50):
+    '''
+    This provides autocomplete suggestions for given query string
+
+        parameters :
+            q: accepts UTF-8 characters. The query string to search against the elasticsearch index.
+            limit: The number of results to be returned by the API.
+            factor: A parameter to modify the search sorting based on
+                    the formula factor => Nominatim importance * factor + elasticsearch_score.
+            fuzzy: Provides results with typo tolerence.
+
+        returns :
+            results: The autocompletion results have the following format
+                    {
+                        "0": {
+                                "addr": "",
+                                ...
+                                "place_id": ,
+                                "postcode": ,
+                                "importance": ,
+                                "country_code": ,
+                                "calculated_score": 
+                        },
+                        "1": {
+                            ...
+                        },
+                        ...
+                    } 
+    '''
     if q == '':
         return
     es = Elasticsearch()
-    print(fuzzy)
+    # For fuzzy query - For typo tolerence support
     if fuzzy == 'True':
         print("Fuzzy query")
         res = es.search(index="nominatim_sugg", body={
@@ -36,7 +64,8 @@ def pref(q, fuzzy=False, limit=10, factor=50):
                     },
                 "order": "desc"
                 }
-            }
+            },
+            "size": limit
         })
         hits = res['hits']['hits']
         results = {}
@@ -52,7 +81,7 @@ def pref(q, fuzzy=False, limit=10, factor=50):
     for i, term in enumerate(q):
         terms += term.strip().split(" ")
 
-    print(terms)
+    # If the query string is a single word, do simple prefix match
     if len(terms) == 1:
         res = es.search(index="nominatim_sugg", body={
             "query": {
@@ -76,6 +105,9 @@ def pref(q, fuzzy=False, limit=10, factor=50):
             },
             "size": limit
         })
+    # If the query string has more than one word, we use tokenization.
+    # first n-1 words are used to get terms_set matching
+    # the last word is used to get prefix matching
     else:
         res = es.search(index="nominatim_sugg", body={
             "query": {
@@ -115,6 +147,8 @@ def pref(q, fuzzy=False, limit=10, factor=50):
             },
             "size": limit
         })
+
+    # We modify the results appropriately to return in required format
     hits = res['hits']['hits']
     results = {}
     for i, hit in enumerate(hits):
