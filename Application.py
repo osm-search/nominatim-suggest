@@ -14,7 +14,7 @@ if __name__ == "__main__":
     tags = ['name:'+i for i in languages]
     tags.append('name')
 
-    db_connection = DBConnection()
+    db_connection = DBConnection(user="nominatim", password="")
 
     index_name = "nominatim_sugg"
     elasticsearch = ESConnection()

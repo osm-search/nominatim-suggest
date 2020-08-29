@@ -5,8 +5,15 @@ import logging
 
 
 class DBConnection:
-    def __init__(self):
-        self.connection = self.connect_to_db()
+    def __init__(self, user="nominatim", password=""):
+        '''
+            Initializes a DB Connection
+
+                parameters :
+                    user: The username to connect to psql
+                    password: password of this user
+        '''
+        self.connection = self.connect_to_db(user, password)
 
     def test_connection(self):
         '''
@@ -16,18 +23,22 @@ class DBConnection:
         self.connection.get_dsn_parameters()
         self.connection.fetch_test()
 
-    def connect_to_db(self):
+    def connect_to_db(self, user, password):
         '''
         Tries to create a connection to the Nominatim postresql DB
+
+                parameters :
+                    user: The username to connect to psql
+                    password: password of this user
         '''
         logging.debug("=================================================================")
         logging.debug("Trying to create a connection")
         try:
             connection = psycopg2.connect(
-                user="nominatim",         # Provide a user with read only permission
-                                          # to avoid security issues
+                user=user,                  # Provide a user with read only permission
+                                            # to avoid security issues
                                           
-                password="",              # Replace with your password while using
+                password=password,          # Replace with your password while using
                 host="127.0.0.1",
                 port="5432",
                 database="nominatim"
