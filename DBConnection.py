@@ -37,7 +37,7 @@ class DBConnection:
             connection = psycopg2.connect(
                 user=user,                  # Provide a user with read only permission
                                             # to avoid security issues
-                                          
+
                 password=password,          # Replace with your password while using
                 host="127.0.0.1",
                 port="5432",
@@ -64,7 +64,7 @@ class DBConnection:
         except:
             logging.debug("Failed")
             exit
- 
+
     def fetch_test(self):
         '''
         Executes a test query on the connection
@@ -87,6 +87,6 @@ class DBConnection:
 
     def close_connection(self):
         '''
-        Closes the connection to the DB 
+        Closes the connection to the DB
         '''
         self.connection.close()

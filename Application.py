@@ -14,9 +14,9 @@ if __name__ == "__main__":
     tags = ['name:'+i for i in languages]
     tags.append('name')
 
-    db_connection = DBConnection(user="nominatim", password="")
+    db_connection = DBConnection(user="nominatim_reader", password="1562")
 
-    index_name = "nominatim_sugg"
+    index_name = "nominatim_suggestions"
     elasticsearch = ESConnection()
     elasticsearch.delete_index(index_name)
     with open('mapping.json') as f:

@@ -156,3 +156,70 @@ def pref(q, fuzzy=False, limit=10, factor=50):
         results[i] = hit['_source']
 
     return results
+
+
+@hug.get('/prefix_match')
+def prefix_match(q, limit=10, factor=50):
+    '''
+    This provides prefix match autocomplete suggestions for given query string
+
+        parameters :
+            q: accepts UTF-8 characters. The query string to search against the elasticsearch index.
+            limit: The number of results to be returned by the API.
+            factor: A parameter to modify the search sorting based on
+                    the formula factor => Nominatim importance * factor + elasticsearch_score.
+
+        returns :
+            results: The autocompletion results have the following format
+                    {
+                        "0": {
+                                "addr": "",
+                                ...
+                                "place_id": ,
+                                "postcode": ,
+                                "importance": ,
+                                "country_code": ,
+                                "calculated_score": 
+                        },
+                        "1": {
+                            ...
+                        },
+                        ...
+                    } 
+    '''
+    if q == '':
+        return
+    es = Elasticsearch()
+
+    # Do simple prefix match to fetch suggestions
+    res = es.search(index="nominatim_sugg", body={
+        "query": {
+            "multi_match": {
+                "query": q,
+                "type": "phrase_prefix"
+            }
+        },
+        "sort": {
+            "_script": {
+                "type": "number",
+                "script": {
+                    "lang": "painless",
+                    "source": "doc[\"importance\"].value * " + str(factor) + " + _score",
+                    "params": {
+                        "factor": factor
+                    }
+                },
+            "order": "desc"
+            }
+        },
+        "size": limit
+    })
+
+    # We modify the results appropriately to return in required format
+    hits = res['hits']['hits']
+    results = {}
+    for i, hit in enumerate(hits):
+        hit['_source'].update({"calculated_score": hit['sort'][0]})
+        results[i] = hit['_source']
+
+    return results
