@@ -4,7 +4,7 @@ from ESConnection import ESConnection
 def form_doc(db_connection, record, tags, index_name='nonminatim'):
     '''
     It forms a doc that can be indexed in elasticsearch
-    
+
         Parameters:
             connection : postgresql connection to fetch data
             record : The record whose address is to be formed
@@ -13,11 +13,13 @@ def form_doc(db_connection, record, tags, index_name='nonminatim'):
 
         Returns:
             doc : a dictioanary which needs to be indexed in elasticsearch
-    
+
     '''
     formed_address = form_address(db_connection, record, tags, index_name)
     doc = formed_address
     doc.update({'place_id': record['place_id']})
+    doc.update({'category': record['class']})
+    doc.update({'type': record['type']})
     if 'osm_id' in record:
         doc.update({'osm_id': record['osm_id'], 'osm_type': record['osm_type']})
     if record['postcode']:
@@ -42,7 +44,7 @@ def form_address(connection, record, tags, index_name='nominatim'):
 
         Returns:
             address : dictionary with names using `tags` list elements as keys
-    
+
     '''
     if not record or not record['name']:
         return {}
