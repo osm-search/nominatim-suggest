@@ -14,9 +14,9 @@ if __name__ == "__main__":
     tags = ['name:'+i for i in languages]
     tags.append('name')
 
-    db_connection = DBConnection(user="nominatim_reader", password="1562")
+    db_connection = DBConnection(user="nominatim_reader", password="")
 
-    index_name = "nominatim_suggestions"
+    index_name = "nominatim_sugg"
     elasticsearch = ESConnection()
     elasticsearch.delete_index(index_name)
     with open('mapping.json') as f:
@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     logging.debug("================================================================")
     logging.debug("================================================================")
-    sql = "SELECT place_id, parent_place_id, name, address, country_code, importance, \
+    sql = "SELECT place_id, parent_place_id, name, address, country_code, importance, class, type, \
          housenumber, postcode, rank_search, rank_address from placex where name is not null \
 and name ?| ARRAY[" + ','.join(["'" + tag + "'" for tag in tags]) + "] \
 order by rank_search"
@@ -60,6 +60,6 @@ order by rank_search"
         records.append(record)
         t -= 1
     if body:
-        elasticsearch.bulk_index(index_name=index_name, body=body)    
+        elasticsearch.bulk_index(index_name=index_name, body=body)
     logging.debug('Total time = ' + str(time.time() - start_time))
 
