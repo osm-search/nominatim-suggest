@@ -64,7 +64,7 @@ The suggestions are provided by a hug API, which is usually hosted on port 8000 
 ### Installation and setup
 Reqirements to provide the suggestions:
 * Elasticsearch server should be running.
-    Download and run elasticsearch from [here](https://www.elastic.co/downloads/elasticsearch). Version 7.6.2 is used in this project.
+    Download and run elasticsearch from [here](https://www.elastic.co/downloads/elasticsearch). Version 7.8 is used in this project.
 
     The elasticsearch python client is used in the suggestion API. The client can be installed using
 
@@ -83,7 +83,7 @@ Reqirements to provide the suggestions:
 
 To start the elasticsearch server, run
 
-    cd path/to/elasticsearch-7.6.2/bin
+    cd path/to/elasticsearch-7.8.0/bin
     ./elasticsearch
 
 For our project, we have `search.py`. This file is currently available [here](https://github.com/krahulreddy/nominatim-indexing/blob/master/search.py).
