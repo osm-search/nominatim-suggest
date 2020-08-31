@@ -74,7 +74,9 @@ All the three above can be used to set up Nominatim suggestions anywhere!
 #### Special features
 
 * Tokenization allows reordering of search terms.
+
 ![Imgur](https://i.imgur.com/zAeI3mi.png)
+
 **Image:** autocomplete end point provides tokenization to allow reordering of search terms.
 
 > **Note:** This tokenization might not be preferred by all users. We have prefix_match endpoint, which performs only prefix_match search and does not allow tokenization.
@@ -84,28 +86,43 @@ All the three above can be used to set up Nominatim suggestions anywhere!
 formula = [wiki importance or {0.75 - record['rank_search'] / 40}] * factor + elasticsearch score
 
 ![Imgur](https://i.imgur.com/YM0ms25.png)
+
 **Image:** autocomplete end point does not provide important places. This is because of the modified factor.
 
 ![Imgur](https://i.imgur.com/guLn5Ch.png)
+
 **Image:** autocomplete end point provides important places first, with default formula.
 
 * The API endpoints have features to modify the type of search performed.
 
 ![Imgur](https://i.imgur.com/8n9nITS.png)
+
 **Image:** Fuzzy query type to allow typo tolerence.
 
 * The suggestions are provided on each keystroke and are fast.(The suggestions provided are fast enough, so we did not implement debouncing)
 
 ![Imgur](https://i.imgur.com/3lnjEkM.png)
+
 **Image:** Waterfall of network calls.
 
 * Indexig time for planet-wide DB is less than 20 hours.
 * The elasticsearch index takes up 10-13 GB of total space for planet wide DB.
+
 ![Imgur](https://i.imgur.com/2QlbO6i.png)
+
+**Image:** Shows the suggestion index size.
+
 * Browser default language support - If the suggestions fetched are not from the browser default language, we provide the address in browser default language in paranthesis.
+
 ![Imgur](https://i.imgur.com/7dayNAH.png)
+
+**Image:** Since the user typed in Kannada, and my browser default is English, addr:en has been shown in paranthesis.
+
+
 * The suggestions also include icons to denote the category and type of the place.
+
 ![Imgur](https://i.imgur.com/WpVuLc0.png)
+
 * Our setup can also be used over smaller extracts of Nominatim DB.
 
 ### What did I learn?
