@@ -54,36 +54,86 @@ The following steps were taken to provide suggestions:
 4. Fetching the suggestions
     A branch of Nominatim-UI has been created to fetch and display the suggestions. This branch has code to fetch suggestions from your suggestions end point and display them as a list.
 
+### What is the end product?
+
+The complete instructions on how to set up the project are available at [nominatim-indexing](https://github.com/krahulreddy/nominatim-indexing).
+
+> The hosted server contains the end product of this project. These links might not be accessible after September 2020.
+[Server with Nominatim-UI](https://gsoc2020.nominatim.org/nominatim/ui/search.html)
+[API with suggestions](https://gsoc2020.nominatim.org/suggest/autocomplete?q=new%20york)
+
+As an end product, we have:
+* An Application that can setup elasticsearch an index for your extract of the OSM DB. This can be configured to index any set of name tags supported by Nominatim. 
+
+* We also have `search.py`, which can be used to host these suggestions as an API. The API endpoints and the search queries are explained in [nominatim-indexing](https://github.com/krahulreddy/nominatim-indexing).
+
+* The front-end changes needed to use these suggestions are available at [Nominatim UI](https://github.com/osm-search/nominatim-ui/pull/32)
+
+All the three above can be used to set up Nominatim suggestions anywhere!
+
+#### Special features
+
+* Tokenization allows reordering of search terms.
+![Imgur](https://i.imgur.com/zAeI3mi.png)
+**Image:** autocomplete end point provides tokenization to allow reordering of search terms.
+
+> **Note:** This tokenization might not be preferred by all users. We have prefix_match endpoint, which performs only prefix_match search and does not allow tokenization.
+
+* The suggestions are sorted based on a formula to provide more important places first (Nominatim Importance score from wikidata is used for this)
+
+formula = [wiki importance or {0.75 - record['rank_search'] / 40}] * factor + elasticsearch score
+
+![Imgur](https://i.imgur.com/YM0ms25.png)
+**Image:** autocomplete end point does not provide important places. This is because of the modified factor.
+
+![Imgur](https://i.imgur.com/guLn5Ch.png)
+**Image:** autocomplete end point provides important places first, with default formula.
+
+* The API endpoints have features to modify the type of search performed.
+
+![Imgur](https://i.imgur.com/8n9nITS.png)
+**Image:** Fuzzy query type to allow typo tolerence.
+
+* The suggestions are provided on each keystroke and are fast.(The suggestions provided are fast enough, so we did not implement debouncing)
+
+![Imgur](https://i.imgur.com/3lnjEkM.png)
+**Image:** Waterfall of network calls.
+
+* Indexig time for planet-wide DB is less than 20 hours.
+* The elasticsearch index takes up 10-13 GB of total space for planet wide DB.
+![Imgur](https://i.imgur.com/2QlbO6i.png)
+* Browser default language support - If the suggestions fetched are not from the browser default language, we provide the address in browser default language in paranthesis.
+![Imgur](https://i.imgur.com/7dayNAH.png)
+* The suggestions also include icons to denote the category and type of the place.
+![Imgur](https://i.imgur.com/WpVuLc0.png)
+* Our setup can also be used over smaller extracts of Nominatim DB.
+
 ### What did I learn?
 
-As a part of this project, I was able to learn 
+As a part of this project, I was able to learn
+
 * elasticsearch indexing and querying
 * more about how Nominatim works
 * handling the planet DB
 * Working and hosting on a server
-
-### What is the end product?
-
-
-
-#### Special features
-
-* The suggestions are sorted based on a formula to provide more important places first (Nominatim Importance score from wikidata is used for this)
-* The API endpoints have features to modify the type of search performed.
-* The suggestions are provided on each keystroke and are very fast.(The suggestions provided are fast enough, so we did not implement debouncing)
-* Indexig time for planet-wide DB is less than 20 hours.
-* The elasticsearch index takes up close to 10 GB of total space for planet wide DB.
-* Browser default language support.
-* The suggestions also include icons to denote the category and type of the place.
-* Our setup can also be used over smaller extracts of Nominatim DB.
+* Commenting and Doocumenting Python application
 
 ### What next?
+The following area few open ends of the project which can be improved and enhanced:
+
+* The UI on the server can be improved.
+* There are a lot of duplicate entries in the Nominatim DB. This effects the elasticsearch index size and the suggestions contains duplicates sometimes. Deduplication was attempted as part of this project, but wasn't successful.
+* Since results are sorted based on the importance score, we can try to incorporate this during the indexing time to decrease the search time even further.
+* A test suite can be added for this project.
+* The address formation can be improved.
+* language support on the fetching part can be enhanced.
 
 ## Recap of the project
 
 This section contains a brief overview of the work done over the last 5 months (Including the proposal writing)
 
 ### Proposal
+
 The prerequisite for applying for GSoC for OpenStreetMap was to have mapped with OpenStreetMap. For `Nominatim` projects, there was an extra `Pull Request` requirement. I started working and pushed the following code:
 
 * [First PR](https://github.com/osm-search/Nominatim/pull/1714) for issue [#886](https://github.com/osm-search/Nominatim/issues/886).
@@ -124,7 +174,7 @@ As part of this phase, the following work was done:
 
 * Made sure the address formation is right, and indexed the planet-wide Database in most used languages.
 * Made sure the indexing time was < 20 hours (This was regarded well within the limit, and approved.)
-* Made sure the DB size was ~10 GB for 10 languages. (This was also well within the expected range and approved.)
+* Made sure the DB size was <13 GB for 10 languages. (This was also well within the expected range and approved.)
 * Made sure the final code is clean and well commented.
 * Finalized the queries to provide accurate suggestions:
     * Tokenization and completion are used together to provide accurate results.
@@ -139,6 +189,7 @@ As part of this phase, the following work was done:
 More than planned amount of work was done by the end of phase 1. I did another internship along with this GSoC project. That affected my work and communication with the mentors during the Phase 2 of the project. This was covered a bit by the extra work done during phase 1. But still, without this other commitment, I could have taken up few other tasks for this project. I still intend to work on this and improve the project beyond the scope of GSoC.
 
 ## Acknowledgements
+
 My mentors [Sarah Hoffmann](https://github.com/lonvia) and [Marc Tobias](https://github.com/mtmail) helped me throughout the process. Our weekly calls helped a lot in keeping the work flowing in the right direction. They made sure I was equipped with the right set of knowledge and tools to carry on with this project.
 
 I would like to thank my mentors and OpenStreetMap for this opportunity of working on this project. I would also like to thank OpenCage for providing the server used during the project. Hosting a live server with my project made the project experience much better.
