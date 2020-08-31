@@ -79,6 +79,10 @@ Reqirements to provide the suggestions:
 
         hug -f filename
 
+* The packages required to execute `Application.py` can be found in `requirements.txt`. They can be installed using
+
+        pip3 install -r requirements.txt
+
 ### Running and Debugging
 
 To start the elasticsearch server, run

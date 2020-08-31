@@ -1,7 +1,5 @@
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search
 import hug
-import json
 import re
 
 @hug.response_middleware()

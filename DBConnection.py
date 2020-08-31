@@ -49,8 +49,8 @@ class DBConnection:
             register_hstore(connection, globally=True, unicode=True)
             logging.debug("Success")
             return connection
-        except:
-            logging.debug("Failed")
+        except psycopg2.errors.DatabaseError as e:
+            print(e)
             exit
 
     def get_dsn_parameters(self):
@@ -61,8 +61,8 @@ class DBConnection:
         logging.debug("Trying to logging.debug DSN parameters: ")
         try:
             logging.debug(self.connection.connection.get_dsn_parameters())
-        except:
-            logging.debug("Failed")
+        except psycopg2.errors.DatabaseError as e:
+            print(e)
             exit
 
     def fetch_test(self):
@@ -81,8 +81,8 @@ class DBConnection:
             logging.debug(json.dumps(record))
             cursor.close()
 
-        except:
-            logging.debug("Failed")
+        except psycopg2.errors.DataError as e:
+            print(e)
             exit
 
     def close_connection(self):
